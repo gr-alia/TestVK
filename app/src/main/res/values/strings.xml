@@ -1,5 +1,8 @@
 <resources>
-    <string name="app_name">TestVK</string>'
+    <string name="app_name">TestVK</string>
+    <string name="login_btn">Login with VK</string>'
     <integer name="com_vk_sdk_AppId">6253172</integer>
+
+    <string name="pref_user_data">com.alia.testvk.PREFERENCE_USER_DATA</string>
 
 </resources>
