@@ -2,6 +2,7 @@ package com.alia.testvk;
 
 import android.app.Application;
 
+import com.alia.testvk.network.RetrofitService;
 import com.vk.sdk.VKSdk;
 
 /**
@@ -13,5 +14,6 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         VKSdk.initialize(this);
+        RetrofitService.initInstance();
     }
 }
