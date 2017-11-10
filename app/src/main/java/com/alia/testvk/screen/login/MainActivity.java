@@ -22,18 +22,18 @@ public class MainActivity extends AppCompatActivity {
     private LoginController mLoginController;
     private String scopes[] = {"video", "wall", "friends"};
 
-
     @BindView(R.id.login)
     Button mLoginButton;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
         mLoginController = new LoginController(this);
+        if (!VKSdk.isLoggedIn()) {
+            mLoginController.deleteToken();
+        }
         if (mLoginController.getToken() != null) {
             openFeed();
             finish();

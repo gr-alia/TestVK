@@ -1,9 +1,13 @@
-
 package com.alia.testvk.model;
 
-import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+
+import java.util.List;
+
+/**
+ * Created by Alyona on 10.11.2017.
+ */
 
 public class Response {
 

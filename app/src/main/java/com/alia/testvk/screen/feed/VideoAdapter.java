@@ -1,6 +1,8 @@
 package com.alia.testvk.screen.feed;
 
 import android.content.Context;
+import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +12,7 @@ import android.widget.TextView;
 
 import com.alia.testvk.R;
 import com.alia.testvk.model.VideoItem;
+import com.alia.testvk.screen.player.PlayerActivity;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -26,9 +29,17 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoHolder>
     private Context mContext;
     private List<VideoItem> mVideos;
 
-    public VideoAdapter(Context context) {
+    private final OnItemClickListener mOnItemClickListener;
+
+    public interface OnItemClickListener {
+        void onItemClick(@NonNull View view, @NonNull VideoItem video);
+
+    }
+
+    public VideoAdapter(Context context, @NonNull OnItemClickListener onItemClickListener) {
         mContext = context;
         mVideos = new ArrayList<>();
+        mOnItemClickListener = onItemClickListener;
     }
 
     @Override
@@ -43,6 +54,9 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoHolder>
         VideoItem video = mVideos.get(position);
         holder.bind(video);
 
+        holder.itemView.setOnClickListener(mInternalListener);
+        holder.itemView.setTag(video);
+
     }
 
     @Override
@@ -54,7 +68,13 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoHolder>
         mVideos.addAll(videos);
         notifyDataSetChanged();
     }
-
+    private final View.OnClickListener mInternalListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            VideoItem video = (VideoItem) view.getTag();
+            mOnItemClickListener.onItemClick(view, video);
+        }
+    };
     class VideoHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.thumbnail)
         ImageView mThumbnailView;

@@ -5,4 +5,6 @@
 
     <string name="pref_user_data">com.alia.testvk.PREFERENCE_USER_DATA</string>
 
+    <string name="action_exit">Log out</string>
+
 </resources>

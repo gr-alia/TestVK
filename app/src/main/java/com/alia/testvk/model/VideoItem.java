@@ -293,4 +293,8 @@ public class VideoItem {
         this.repeat = repeat;
     }
 
+    public String getCombId() {
+        return ownerId + "_" + id + "_" + accessKey;
+    }
+
 }

@@ -17,7 +17,15 @@ public class Item {
     private Integer date;
     @SerializedName("video")
     @Expose
-    private Video video;
+    private VideoList video;
+
+    @SerializedName("player")
+    @Expose
+    private String player;
+
+    public String getPlayer() {
+        return player;
+    }
 
     public String getType() {
         return type;
@@ -43,12 +51,9 @@ public class Item {
         this.date = date;
     }
 
-    public Video getVideo() {
+    public VideoList getVideo() {
         return video;
     }
 
-    public void setVideo(Video video) {
-        this.video = video;
-    }
 
 }

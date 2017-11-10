@@ -32,6 +32,10 @@ public class LoginController {
     public void persistToken(VKAccessToken token){
         getSharedPrefs().edit().putString(KEY_STORED_TOKEN, getGson().toJson(token)).commit();
     }
+    public void deleteToken() {
+        getSharedPrefs().edit().remove(KEY_STORED_TOKEN).commit();
+
+    }
     public VKAccessToken getToken(){
         SharedPreferences prefs = getSharedPrefs();
         if (prefs.contains(KEY_STORED_TOKEN)) {
