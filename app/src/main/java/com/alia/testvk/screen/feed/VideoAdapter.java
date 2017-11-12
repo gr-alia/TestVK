@@ -65,9 +65,11 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoHolder>
     }
 
     public void changeDataSet(List<VideoItem> videos) {
+        mVideos.clear();
         mVideos.addAll(videos);
         notifyDataSetChanged();
     }
+
     private final View.OnClickListener mInternalListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -75,6 +77,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoHolder>
             mOnItemClickListener.onItemClick(view, video);
         }
     };
+
     class VideoHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.thumbnail)
         ImageView mThumbnailView;

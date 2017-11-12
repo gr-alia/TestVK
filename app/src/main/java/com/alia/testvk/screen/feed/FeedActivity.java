@@ -1,6 +1,8 @@
 package com.alia.testvk.screen.feed;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -35,7 +37,7 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-public class FeedActivity extends AppCompatActivity implements VideoAdapter.OnItemClickListener {
+public class FeedActivity extends AppCompatActivity implements VideoAdapter.OnItemClickListener, SwipeRefreshLayout.OnRefreshListener {
     public static final String EXTRA_PLAYER = "FeedActivity.EXTRA_PLAYER";
     private static final String TAG = "FeedActivity debug";
     private String mAccessToken;
@@ -57,6 +59,7 @@ public class FeedActivity extends AppCompatActivity implements VideoAdapter.OnIt
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_feed);
         ButterKnife.bind(this);
         mAccessToken = getIntent().getStringExtra(MainActivity.EXTRA_TOKEN);
@@ -65,25 +68,31 @@ public class FeedActivity extends AppCompatActivity implements VideoAdapter.OnIt
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(mAdapter);
 
+        mRefreshLayout.setOnRefreshListener(this);
+
         mApi = RetrofitService.getInstance().getApi();
 
-        loadVideo("");
+        loadVideoList("");
 
         mRecyclerView.addOnScrollListener(new EndlessRecyclerOnScrollListener() {
             @Override
             public void onLoadMore() {
-                loadVideo(mStartFrom);
+                loadVideoList(mStartFrom);
             }
         });
 
     }
 
-    private void loadVideo(String startFrom) {
+    private void loadVideoList(String startFrom) {
         mNewsfeedSubscription = mApi.getNewsfeedVideos(mAccessToken, 5, startFrom)
                 .map(NewsfeedResponse::getResponse)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::handleData, this::showError);
+                .subscribe(this::handleData, this::showError, () -> {
+                    Log.i(TAG, "Rx Completed");
+                    if (mRefreshLayout.isRefreshing())
+                        mRefreshLayout.setRefreshing(false);
+                });
     }
 
     @Override
@@ -146,5 +155,10 @@ public class FeedActivity extends AppCompatActivity implements VideoAdapter.OnIt
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onRefresh() {
+        loadVideoList("");
     }
 }
