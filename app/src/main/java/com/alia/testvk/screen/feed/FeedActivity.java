@@ -17,7 +17,6 @@ import android.widget.Toast;
 import com.alia.testvk.model.Item;
 import com.alia.testvk.model.NewsfeedResponse;
 import com.alia.testvk.model.Response;
-import com.alia.testvk.model.Video;
 import com.alia.testvk.model.VideoItem;
 import com.alia.testvk.model.VideoResponse;
 import com.alia.testvk.network.RetrofitService;
@@ -39,9 +38,10 @@ import rx.schedulers.Schedulers;
 public class FeedActivity extends AppCompatActivity implements VideoAdapter.OnItemClickListener {
     public static final String EXTRA_PLAYER = "FeedActivity.EXTRA_PLAYER";
     private static final String TAG = "FeedActivity debug";
-    private String accessToken;
+    private String mAccessToken;
     private VideoAdapter mAdapter;
-    private VKApi api;
+    private VKApi mApi;
+    private String mStartFrom;
 
     @Nullable
     private Subscription mNewsfeedSubscription;
@@ -59,20 +59,31 @@ public class FeedActivity extends AppCompatActivity implements VideoAdapter.OnIt
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed);
         ButterKnife.bind(this);
-        accessToken = getIntent().getStringExtra(MainActivity.EXTRA_TOKEN);
+        mAccessToken = getIntent().getStringExtra(MainActivity.EXTRA_TOKEN);
 
         mAdapter = new VideoAdapter(this, this);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(mAdapter);
 
-        api = RetrofitService.getInstance().getApi();
-        mNewsfeedSubscription = api.getNewsfeedVideos(accessToken, 5)
+        mApi = RetrofitService.getInstance().getApi();
+
+        loadVideo("");
+
+        mRecyclerView.addOnScrollListener(new EndlessRecyclerOnScrollListener() {
+            @Override
+            public void onLoadMore() {
+                loadVideo(mStartFrom);
+            }
+        });
+
+    }
+
+    private void loadVideo(String startFrom) {
+        mNewsfeedSubscription = mApi.getNewsfeedVideos(mAccessToken, 5, startFrom)
                 .map(NewsfeedResponse::getResponse)
-                .map(Response::getItems)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::handleData, this::showError);
-
     }
 
     @Override
@@ -85,11 +96,13 @@ public class FeedActivity extends AppCompatActivity implements VideoAdapter.OnIt
         }
     }
 
-    private void handleData(List<Item> postItems) {
+    private void handleData(Response data) {
         Log.i(TAG, "Success");
+
+        mStartFrom = data.getNextFrom();
         List<VideoItem> videos = new ArrayList<>();
-        for (int i = 0; i < postItems.size(); i++) {
-            videos.addAll(postItems.get(i).getVideo().getVideoItems());
+        for (int i = 0; i < data.getItems().size(); i++) {
+            videos.addAll(data.getItems().get(i).getVideo().getVideoItems());
         }
         mAdapter.changeDataSet(videos);
     }
@@ -106,13 +119,12 @@ public class FeedActivity extends AppCompatActivity implements VideoAdapter.OnIt
 
     @Override
     public void onItemClick(@NonNull View view, @NonNull VideoItem video) {
-        mVideoSubscription = api.getVideo(accessToken, video.getCombId())
+        mVideoSubscription = mApi.getVideo(mAccessToken, video.getCombId())
                 .map(VideoResponse::getResponse)
                 .map(Response::getItems)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::createIntent, this::showError);
-
 
     }
 
@@ -126,7 +138,6 @@ public class FeedActivity extends AppCompatActivity implements VideoAdapter.OnIt
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_exit:
-                Boolean is = VKSdk.isLoggedIn();
                 VKSdk.logout();
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);

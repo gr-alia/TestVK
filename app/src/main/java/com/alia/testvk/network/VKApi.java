@@ -16,7 +16,7 @@ public interface VKApi {
     String BASE_URL = "https://api.vk.com/method/";
 
     @GET("newsfeed.get?filters=video&v=5.69")
-    Observable<NewsfeedResponse> getNewsfeedVideos(@Query("access_token") String token, @Query("count") Integer count);
+    Observable<NewsfeedResponse> getNewsfeedVideos(@Query("access_token") String token, @Query("count") Integer count, @Query("start_from") String startFrom);
 
     @GET("video.get?v=5.69")
     Observable<VideoResponse> getVideo(@Query("access_token") String token, @Query("videos") String ids);
